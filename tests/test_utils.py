@@ -24,6 +24,8 @@ def test_logger_initialization_and_mkdir() -> None:
     """Test that the logger creates the directory if it does not exist."""
     import coreason_etl_cdc_wonder.utils.logger
 
+    logger.remove()
+
     log_path = Path("logs")
     if log_path.exists():
         shutil.rmtree(log_path)
