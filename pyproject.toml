@@ -12,7 +12,15 @@ authors = [
     { name = "Akshaya M", email = "akshaya.movvar@coreason.ai" },
 ]
 dependencies = [
+    "dlt>=1.23.0",
     "loguru>=0.7.2",
+    "lxml>=6.0.2",
+    "lxml-stubs>=0.5.1",
+    "polars>=1.39.0",
+    "pydantic>=2.12.5",
+    "requests>=2.32.5",
+    "respx>=0.22.0",
+    "types-requests>=2.32.4.20260107",
 ]
 license = { file = "LICENSE" }
 classifiers = [
@@ -58,6 +66,9 @@ target-version = "py314"
 [tool.ruff.lint]
 select = ["E", "F", "B", "I", "UP", "SIM", "RUF", "ARG", "C4", "PT", "TCH", "FA", "PIE", "RET", "PERF", "FURB", "LOG", "N", "A", "S"]
 ignore = ["S101", "TC001", "TC002", "TC003", "UP037"]
+
+[tool.deptry]
+ignore = ["DEP002"]
 
 [tool.mypy]
 python_version = "3.14"
