@@ -8,9 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
 
-import importlib
-import shutil
-from pathlib import Path
+import sys
+from unittest.mock import patch
 
 from coreason_etl_cdc_wonder.utils.logger import logger
 
@@ -22,14 +21,26 @@ def test_logger_exports() -> None:
 
 def test_logger_initialization_and_mkdir() -> None:
     """Test that the logger creates the directory if it does not exist."""
-    import coreason_etl_cdc_wonder.utils.logger
 
-    logger.remove()
+    # By mocking pathlib.Path directly during the reload, we can intercept the call.
+    # We must mock it before import to ensure it works correctly on the next reload.
 
-    log_path = Path("logs")
-    if log_path.exists():
-        shutil.rmtree(log_path)
+    with patch("pathlib.Path") as mock_path_cls:
+        mock_path_instance = mock_path_cls.return_value
+        mock_path_instance.exists.return_value = False
 
-    importlib.reload(coreason_etl_cdc_wonder.utils.logger)
-    assert log_path.exists()
-    assert log_path.is_dir()
+        # Prevent the logger from creating an actual file or printing to stderr during test
+        with patch("loguru.logger.add"), patch("loguru.logger.remove"):
+            if "coreason_etl_cdc_wonder.utils.logger" in sys.modules:
+                del sys.modules["coreason_etl_cdc_wonder.utils.logger"]
+
+            import coreason_etl_cdc_wonder.utils.logger
+
+        mock_path_cls.assert_any_call("logs")
+        mock_path_instance.exists.assert_called()
+        mock_path_instance.mkdir.assert_called_with(parents=True, exist_ok=True)
+
+    # Restore normal state for other tests
+    if "coreason_etl_cdc_wonder.utils.logger" in sys.modules:
+        del sys.modules["coreason_etl_cdc_wonder.utils.logger"]
+    import coreason_etl_cdc_wonder.utils.logger  # noqa: F401
