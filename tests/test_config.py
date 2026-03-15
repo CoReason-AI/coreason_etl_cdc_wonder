@@ -11,6 +11,10 @@
 import os
 import uuid
 
+from hypothesis import given
+from hypothesis import strategies as st
+from hypothesis.provisional import urls
+
 from coreason_etl_cdc_wonder.config import (
     NAMESPACE_CDC,
     CDCPipelineConfig,
@@ -80,3 +84,47 @@ def test_cdcwonder_parameters_config_alias() -> None:
     config = CDCWonderParametersConfig(B_1="D76.V3", M_1="D76.M4")
     assert config.group_by_1 == "D76.V3"
     assert config.measure_1 == "D76.M4"
+
+
+@given(  # type: ignore
+    b1=st.text(),
+    b2=st.text(),
+    b3=st.text(),
+    m1=st.text(),
+    m2=st.text(),
+    m3=st.text(),
+    custom=st.dictionaries(st.text(), st.text()),
+)
+def test_cdcwonder_parameters_config_hypothesis(
+    b1: str, b2: str, b3: str, m1: str, m2: str, m3: str, custom: dict[str, str]
+) -> None:
+    """Property-based tests for CDCWonderParametersConfig."""
+    config = CDCWonderParametersConfig(B_1=b1, B_2=b2, B_3=b3, M_1=m1, M_2=m2, M_3=m3, custom_parameters=custom)
+    assert config.group_by_1 == b1
+    assert config.group_by_2 == b2
+    assert config.group_by_3 == b3
+    assert config.measure_1 == m1
+    assert config.measure_2 == m2
+    assert config.measure_3 == m3
+    assert config.custom_parameters == custom
+
+
+@given(dataset_code=st.text(), accept_restrictions=st.booleans())  # type: ignore
+def test_cdcwonder_request_config_hypothesis(dataset_code: str, accept_restrictions: bool) -> None:
+    """Property-based tests for CDCWonderRequestConfig."""
+    config = CDCWonderRequestConfig(dataset_code=dataset_code, accept_datause_restrictions=accept_restrictions)
+    assert config.dataset_code == dataset_code
+    assert config.accept_datause_restrictions is accept_restrictions
+
+
+@given(url=urls())  # type: ignore
+def test_cdcpipeline_config_hypothesis(url: str) -> None:
+    """Property-based tests for CDCPipelineConfig with various valid URLs."""
+    os.environ["CDC_WONDER_API_BASE_URL"] = url
+    try:
+        config = CDCPipelineConfig()
+        # Pydantic HttpUrl normalizes the URL (e.g. lowercasing domain),
+        # so we just check that it parses successfully instead of a strict string match.
+        assert config.api_base_url is not None
+    finally:
+        del os.environ["CDC_WONDER_API_BASE_URL"]
