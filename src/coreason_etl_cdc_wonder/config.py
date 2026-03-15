@@ -8,10 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
 
+import uuid
 from typing import Any
 
 from pydantic import BaseModel, Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+NAMESPACE_CDC = uuid.uuid5(uuid.NAMESPACE_DNS, "cdc.gov")
 
 
 class CDCWonderParametersConfig(BaseModel):

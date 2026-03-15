@@ -9,8 +9,21 @@
 # Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
 
 import os
+import uuid
 
-from coreason_etl_cdc_wonder.config import CDCPipelineConfig, CDCWonderParametersConfig, CDCWonderRequestConfig
+from coreason_etl_cdc_wonder.config import (
+    NAMESPACE_CDC,
+    CDCPipelineConfig,
+    CDCWonderParametersConfig,
+    CDCWonderRequestConfig,
+)
+
+
+def test_namespace_cdc() -> None:
+    """Test the NAMESPACE_CDC constant is properly generated UUIDv5."""
+    assert isinstance(NAMESPACE_CDC, uuid.UUID)
+    expected_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, "cdc.gov")
+    assert expected_uuid == NAMESPACE_CDC
 
 
 def test_cdcwonder_parameters_config_default() -> None:
