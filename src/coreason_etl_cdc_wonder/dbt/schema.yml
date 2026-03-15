@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: cdc_wonder_mortality_rates
+    description: "Silver layer table containing parsed and flattened mortality rates from CDC WONDER."
+    columns:
+      - name: coreason_id
+        description: "Deterministic UUIDv5 generated via Polars in the Python ingestion layer."
+        tests:
+          - not_null
+          - unique
+      - name: icd_10_code
+        description: "The ICD-10 cause of death code."
+        tests:
+          - not_null
+      - name: year
+        description: "The year of mortality data."
+        tests:
+          - not_null
+      - name: deaths
+        description: "Total mortality count for the group."
+      - name: population
+        description: "Population of the demographic group."
+      - name: crude_rate
+        description: "Crude mortality rate per 100,000."
