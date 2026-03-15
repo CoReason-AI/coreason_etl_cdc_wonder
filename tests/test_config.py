@@ -10,7 +10,19 @@
 
 import os
 
-from coreason_etl_cdc_wonder.config import CDCPipelineConfig, CDCWonderRequestConfig
+from coreason_etl_cdc_wonder.config import CDCPipelineConfig, CDCWonderParametersConfig, CDCWonderRequestConfig
+
+
+def test_cdcwonder_parameters_config_default() -> None:
+    """Test the default configuration of CDCWonderParametersConfig."""
+    config = CDCWonderParametersConfig()
+    assert config.group_by_1 == "D76.V1"
+    assert config.group_by_2 == "D76.V2"
+    assert config.group_by_3 == "D76.V9"
+    assert config.measure_1 == "D76.M1"
+    assert config.measure_2 == "D76.M2"
+    assert config.measure_3 == "D76.M3"
+    assert config.custom_parameters == {}
 
 
 def test_cdcwonder_request_config_default() -> None:
@@ -18,7 +30,7 @@ def test_cdcwonder_request_config_default() -> None:
     config = CDCWonderRequestConfig()
     assert config.dataset_code == "D76"
     assert config.accept_datause_restrictions is True
-    assert config.parameters == {}
+    assert isinstance(config.parameters, CDCWonderParametersConfig)
 
 
 def test_cdcpipeline_config_default() -> None:
@@ -41,7 +53,17 @@ def test_cdcpipeline_config_custom_env() -> None:
 
 def test_cdcwonder_request_config_custom() -> None:
     """Test custom configuration of CDCWonderRequestConfig."""
-    config = CDCWonderRequestConfig(dataset_code="D77", accept_datause_restrictions=False, parameters={"B_1": "D76.V1"})
+    custom_params = CDCWonderParametersConfig(B_1="D77.V1", custom_parameters={"F_1": "D77.V1"})
+    config = CDCWonderRequestConfig(dataset_code="D77", accept_datause_restrictions=False, parameters=custom_params)
     assert config.dataset_code == "D77"
     assert config.accept_datause_restrictions is False
-    assert config.parameters == {"B_1": "D76.V1"}
+    assert isinstance(config.parameters, CDCWonderParametersConfig)
+    assert config.parameters.group_by_1 == "D77.V1"
+    assert config.parameters.custom_parameters == {"F_1": "D77.V1"}
+
+
+def test_cdcwonder_parameters_config_alias() -> None:
+    """Test CDCWonderParametersConfig alias."""
+    config = CDCWonderParametersConfig(B_1="D76.V3", M_1="D76.M4")
+    assert config.group_by_1 == "D76.V3"
+    assert config.measure_1 == "D76.M4"
