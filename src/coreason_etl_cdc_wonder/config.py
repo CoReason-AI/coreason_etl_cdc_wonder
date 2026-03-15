@@ -14,6 +14,48 @@ from pydantic import BaseModel, Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class CDCWonderParametersConfig(BaseModel):
+    """
+    AGENT INSTRUCTION: This class defines the explicit parameters to be serialized
+    into the CDC WONDER XML `<request-parameters>` payload.
+    """
+
+    group_by_1: str = Field(
+        default="D76.V1",
+        alias="B_1",
+        description="The primary group-by parameter (e.g., D76.V1 for Age Group).",
+    )
+    group_by_2: str = Field(
+        default="D76.V2",
+        alias="B_2",
+        description="The secondary group-by parameter (e.g., D76.V2 for ICD-10 113 Cause List).",
+    )
+    group_by_3: str = Field(
+        default="D76.V9",
+        alias="B_3",
+        description="The tertiary group-by parameter (e.g., D76.V9 for State).",
+    )
+    measure_1: str = Field(
+        default="D76.M1",
+        alias="M_1",
+        description="The primary measure (e.g., D76.M1 for Deaths).",
+    )
+    measure_2: str = Field(
+        default="D76.M2",
+        alias="M_2",
+        description="The secondary measure (e.g., D76.M2 for Population).",
+    )
+    measure_3: str = Field(
+        default="D76.M3",
+        alias="M_3",
+        description="The tertiary measure (e.g., D76.M3 for Crude Rate).",
+    )
+    custom_parameters: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Any additional custom parameters for the API.",
+    )
+
+
 class CDCWonderRequestConfig(BaseModel):
     """
     AGENT INSTRUCTION: This class defines the configuration for the CDC WONDER API request.
@@ -29,9 +71,9 @@ class CDCWonderRequestConfig(BaseModel):
         description="Strictly required parameter to acknowledge WONDER data use restrictions. "
         "If False, the WONDER API returns HTML errors.",
     )
-    parameters: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional query parameters for the WONDER API.",
+    parameters: CDCWonderParametersConfig = Field(
+        default_factory=CDCWonderParametersConfig,
+        description="Explicitly defined query parameters for the WONDER API.",
     )
 
 
