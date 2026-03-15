@@ -1,0 +1,79 @@
+# Copyright (c) 2026 CoReason Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
+
+import time
+from collections.abc import Iterator
+
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+from coreason_etl_cdc_wonder.config import CDCPipelineConfig
+from coreason_etl_cdc_wonder.payload import generate_wonder_xml_payload
+from coreason_etl_cdc_wonder.utils.logger import logger
+
+
+def _create_retry_session() -> requests.Session:
+    """
+    AGENT INSTRUCTION: Creates a requests Session with polite retry and backoff logic.
+    This ensures the pipeline is robust against CDC WONDER throttling and timeouts.
+    """
+    session = requests.Session()
+    retry_strategy = Retry(
+        total=5,
+        backoff_factor=2,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["POST"],
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
+
+
+def fetch_wonder_data(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> Iterator[bytes]:
+    """
+    AGENT INSTRUCTION: Fetches data from the CDC WONDER API via POST.
+    It streams the response to enable memory-conscious parsing.
+
+    Args:
+        config: The pipeline configuration.
+        delay_seconds: Polite delay before initiating the request.
+
+    Returns:
+        An iterator yielding chunks of bytes from the HTTP response.
+    """
+    logger.info("Preparing to query CDC WONDER API", dataset=config.request_config.dataset_code)
+
+    # Polite API Usage
+    logger.debug("Applying polite delay before request", delay_seconds=delay_seconds)
+    time.sleep(delay_seconds)
+
+    payload = generate_wonder_xml_payload(config.request_config)
+
+    # Construct endpoint: base_url + dataset_code
+    endpoint = f"{str(config.api_base_url).rstrip('/')}/{config.request_config.dataset_code}"
+
+    logger.info("Sending POST request to CDC WONDER API", endpoint=endpoint)
+
+    session = _create_retry_session()
+
+    # The CDC WONDER API expects the XML payload as a POST parameter named "request_xml"
+    response = session.post(
+        url=endpoint,
+        data={"request_xml": payload},
+        stream=True,
+        timeout=(10, 60),  # 10s connect, 60s read timeout
+    )
+
+    response.raise_for_status()
+
+    logger.info("Successfully received streaming response from CDC WONDER API")
+    return response.iter_content(chunk_size=8192)
