@@ -11,6 +11,8 @@
 import uuid
 from typing import Any
 
+import dlt
+from dlt.pipeline.pipeline import Pipeline
 from pydantic import BaseModel, Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -101,3 +103,20 @@ class CDCPipelineConfig(BaseSettings):
         default_factory=CDCWonderRequestConfig,
         description="Configuration for individual dataset requests.",
     )
+
+    def create_dlt_pipeline(self) -> Pipeline:
+        """
+        AGENT INSTRUCTION: Creates and configures the dlt pipeline.
+        It strictly sets `max_table_nesting=0` to prevent schema shredding
+        of the generic CDC WONDER XML arrays in the Bronze layer.
+        """
+        pipeline = dlt.pipeline(
+            pipeline_name="coreason_etl_cdc_wonder",
+            destination="postgres",
+            dataset_name="bronze",
+            progress="log",
+            export_schema_path="schemas/export",
+        )
+        # Apply the explicit nesting constraint for bronze ingestion
+        dlt.config["max_table_nesting"] = 0
+        return pipeline
