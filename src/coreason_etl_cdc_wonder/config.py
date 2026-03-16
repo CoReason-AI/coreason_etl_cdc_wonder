@@ -19,6 +19,36 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 NAMESPACE_CDC = uuid.uuid5(uuid.NAMESPACE_DNS, "cdc.gov")
 
 
+class AppConfig(BaseSettings):
+    """
+    AGENT INSTRUCTION: Base application configuration matching 12-Factor principles.
+    Reads global environment variables like APP_ENV, DEBUG, LOG_LEVEL, etc.
+    """
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    app_env: str = Field(
+        default="development",
+        description="The environment the application is running in (e.g. development, testing, production).",
+    )
+    debug: bool = Field(
+        default=False,
+        description="Whether debugging is enabled.",
+    )
+    secret_key: str = Field(
+        default="replace-me-in-production",
+        description="Secret key for cryptographic signing.",
+    )
+    log_level: str = Field(
+        default="INFO",
+        description="The logging level (e.g. DEBUG, INFO, WARNING, ERROR).",
+    )
+
+
 class CDCWonderParametersConfig(BaseModel):
     """
     AGENT INSTRUCTION: This class defines the explicit parameters to be serialized

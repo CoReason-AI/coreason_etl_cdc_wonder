@@ -18,10 +18,54 @@ from hypothesis.provisional import urls
 
 from coreason_etl_cdc_wonder.config import (
     NAMESPACE_CDC,
+    AppConfig,
     CDCPipelineConfig,
     CDCWonderParametersConfig,
     CDCWonderRequestConfig,
 )
+
+
+def test_app_config_default() -> None:
+    """Test the default configuration of AppConfig."""
+    config = AppConfig()
+    assert config.app_env == "development"
+    assert config.debug is False
+    assert config.secret_key == "replace-me-in-production"  # noqa: S105
+    assert config.log_level == "INFO"
+
+
+def test_app_config_custom_env() -> None:
+    """Test AppConfig reading from environment variables."""
+    os.environ["APP_ENV"] = "production"
+    os.environ["DEBUG"] = "true"
+    os.environ["SECRET_KEY"] = "supersecret"  # noqa: S105
+    os.environ["LOG_LEVEL"] = "DEBUG"
+    try:
+        config = AppConfig()
+        assert config.app_env == "production"
+        assert config.debug is True
+        assert config.secret_key == "supersecret"  # noqa: S105
+        assert config.log_level == "DEBUG"
+    finally:
+        del os.environ["APP_ENV"]
+        del os.environ["DEBUG"]
+        del os.environ["SECRET_KEY"]
+        del os.environ["LOG_LEVEL"]
+
+
+@given(  # type: ignore[misc]
+    app_env=st.text(),
+    debug=st.booleans(),
+    secret_key=st.text(),
+    log_level=st.text(),
+)
+def test_app_config_hypothesis(app_env: str, debug: bool, secret_key: str, log_level: str) -> None:
+    """Property-based tests for AppConfig."""
+    config = AppConfig(app_env=app_env, debug=debug, secret_key=secret_key, log_level=log_level)
+    assert config.app_env == app_env
+    assert config.debug is debug
+    assert config.secret_key == secret_key
+    assert config.log_level == log_level
 
 
 def test_namespace_cdc() -> None:
@@ -87,7 +131,7 @@ def test_cdcwonder_parameters_config_alias() -> None:
     assert config.measure_1 == "D76.M4"
 
 
-@given(  # type: ignore
+@given(  # type: ignore[misc]
     b1=st.text(),
     b2=st.text(),
     b3=st.text(),
@@ -110,7 +154,7 @@ def test_cdcwonder_parameters_config_hypothesis(
     assert config.custom_parameters == custom
 
 
-@given(dataset_code=st.text(), accept_restrictions=st.booleans())  # type: ignore
+@given(dataset_code=st.text(), accept_restrictions=st.booleans())  # type: ignore[misc]
 def test_cdcwonder_request_config_hypothesis(dataset_code: str, accept_restrictions: bool) -> None:
     """Property-based tests for CDCWonderRequestConfig."""
     config = CDCWonderRequestConfig(dataset_code=dataset_code, accept_datause_restrictions=accept_restrictions)
@@ -118,7 +162,7 @@ def test_cdcwonder_request_config_hypothesis(dataset_code: str, accept_restricti
     assert config.accept_datause_restrictions is accept_restrictions
 
 
-@given(url=urls())  # type: ignore
+@given(url=urls())  # type: ignore[misc]
 def test_cdcpipeline_config_hypothesis(url: str) -> None:
     """Property-based tests for CDCPipelineConfig with various valid URLs."""
     os.environ["CDC_WONDER_API_BASE_URL"] = url
