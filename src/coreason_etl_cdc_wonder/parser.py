@@ -74,7 +74,8 @@ def _element_to_dict(elem: etree._Element) -> dict[str, Any]:
     result: dict[str, Any] = {}
 
     for k, v in elem.attrib.items():
-        result[f"@{k}"] = v
+        k_str = k if isinstance(k, str) else str(k, encoding="utf-8")
+        result[f"@{k_str}"] = v
 
     text = elem.text.strip() if elem.text else ""
     if text:
@@ -82,11 +83,12 @@ def _element_to_dict(elem: etree._Element) -> dict[str, Any]:
 
     for child in elem:
         child_dict = _element_to_dict(child)
-        if child.tag not in result:
-            result[child.tag] = child_dict
+        tag = child.tag if isinstance(child.tag, str) else str(child.tag, encoding="utf-8")
+        if tag not in result:
+            result[tag] = child_dict
         else:
-            if not isinstance(result[child.tag], list):
-                result[child.tag] = [result[child.tag]]
-            result[child.tag].append(child_dict)
+            if not isinstance(result[tag], list):
+                result[tag] = [result[tag]]
+            result[tag].append(child_dict)
 
     return result
