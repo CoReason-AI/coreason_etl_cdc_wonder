@@ -11,6 +11,7 @@
 import os
 import uuid
 
+import dlt
 from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.provisional import urls
@@ -128,3 +129,13 @@ def test_cdcpipeline_config_hypothesis(url: str) -> None:
         assert config.api_base_url is not None
     finally:
         del os.environ["CDC_WONDER_API_BASE_URL"]
+
+
+def test_create_dlt_pipeline() -> None:
+    """Test that the dlt pipeline is initialized with correct parameters and constraints."""
+    config = CDCPipelineConfig()
+    pipeline = config.create_dlt_pipeline()
+
+    assert pipeline.pipeline_name == "coreason_etl_cdc_wonder"
+    assert pipeline.dataset_name == "bronze"
+    assert dlt.config.get("max_table_nesting") == 0
