@@ -52,25 +52,22 @@ def fetch_wonder_data(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> 
     """
     logger.info("Preparing to query CDC WONDER API", dataset=config.request_config.dataset_code)
 
-    # Polite API Usage
     logger.debug("Applying polite delay before request", delay_seconds=delay_seconds)
     time.sleep(delay_seconds)
 
     payload = generate_wonder_xml_payload(config.request_config)
 
-    # Construct endpoint: base_url + dataset_code
     endpoint = f"{str(config.api_base_url).rstrip('/')}/{config.request_config.dataset_code}"
 
     logger.info("Sending POST request to CDC WONDER API", endpoint=endpoint)
 
     session = _create_retry_session()
 
-    # The CDC WONDER API expects the XML payload as a POST parameter named "request_xml"
     response = session.post(
         url=endpoint,
         data={"request_xml": payload},
         stream=True,
-        timeout=(10, 60),  # 10s connect, 60s read timeout
+        timeout=(10, 60),
     )
 
     response.raise_for_status()
