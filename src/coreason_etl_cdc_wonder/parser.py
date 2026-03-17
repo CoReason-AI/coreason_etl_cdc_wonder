@@ -60,7 +60,6 @@ def parse_wonder_xml_stream(stream: Iterable[bytes]) -> Iterator[dict[str, Any]]
         row_dict = _element_to_dict(elem)
         yield {"raw_data": row_dict}
 
-        # Free memory by clearing the element and preceding siblings
         elem.clear()
         while elem.getprevious() is not None:
             del elem.getparent()[0]

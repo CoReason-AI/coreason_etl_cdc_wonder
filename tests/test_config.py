@@ -22,6 +22,7 @@ from coreason_etl_cdc_wonder.config import (
     CDCPipelineConfig,
     CDCWonderParametersConfig,
     CDCWonderRequestConfig,
+    PostgresConfig,
 )
 
 
@@ -183,3 +184,30 @@ def test_create_dlt_pipeline() -> None:
     assert pipeline.pipeline_name == "coreason_etl_cdc_wonder"
     assert pipeline.dataset_name == "bronze"
     assert dlt.config.get("max_table_nesting") == 0
+
+
+def test_postgres_config_default() -> None:
+    """Test the default configuration of PostgresConfig."""
+    config = PostgresConfig()
+    assert config.host == "localhost"
+    assert config.port == 5432
+    assert config.user == "postgres"
+    assert config.password == "postgres"  # noqa: S105
+    assert config.database == "postgres"
+
+
+@given(  # type: ignore[misc]
+    host=st.text(),
+    port=st.integers(),
+    user=st.text(),
+    password=st.text(),
+    database=st.text(),
+)
+def test_postgres_config_hypothesis(host: str, port: int, user: str, password: str, database: str) -> None:
+    """Property-based tests for PostgresConfig."""
+    config = PostgresConfig(PGHOST=host, PGPORT=port, PGUSER=user, PGPASSWORD=password, PGDATABASE=database)
+    assert config.host == host
+    assert config.port == port
+    assert config.user == user
+    assert config.password == password
+    assert config.database == database

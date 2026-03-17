@@ -20,7 +20,6 @@ def generate_wonder_xml_payload(config: CDCWonderRequestConfig) -> str:
     """
     root = ET.Element("request-parameters")
 
-    # Strictly include the data use restriction acknowledgment
     if config.accept_datause_restrictions:
         param = ET.SubElement(root, "parameter")
         name = ET.SubElement(param, "name")
@@ -28,7 +27,6 @@ def generate_wonder_xml_payload(config: CDCWonderRequestConfig) -> str:
         value = ET.SubElement(param, "value")
         value.text = "true"
 
-    # Process explicit parameters using their Pydantic aliases (e.g., B_1, M_1)
     params_dict = config.parameters.model_dump(by_alias=True, exclude={"custom_parameters"})
     for k, v in sorted(params_dict.items()):
         if v is not None:
@@ -38,7 +36,6 @@ def generate_wonder_xml_payload(config: CDCWonderRequestConfig) -> str:
             value = ET.SubElement(param, "value")
             value.text = str(v)
 
-    # Process custom parameters
     for k, v in sorted(config.parameters.custom_parameters.items()):
         if v is not None:
             param = ET.SubElement(root, "parameter")
@@ -47,5 +44,4 @@ def generate_wonder_xml_payload(config: CDCWonderRequestConfig) -> str:
             value = ET.SubElement(param, "value")
             value.text = str(v)
 
-    # Generate the XML string (without the <?xml ...?> declaration as CDC WONDER accepts just the root)
     return ET.tostring(root, encoding="unicode", method="xml")
