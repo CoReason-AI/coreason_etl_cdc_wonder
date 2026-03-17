@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: cdc_wonder_mortality_silver
+    description: "Silver layer table mapping CDC mortality metrics back to logical columns."
+    columns:
+      - name: icd_10_code
+        description: "The primary ICD-10 mortality code."
+        tests:
+          - not_null
+      - name: year
+        description: "Year of the recorded death metrics."
+        tests:
+          - not_null
+      - name: coreason_id
+        description: "Vectorized UUIDv5 generated deterministically via python/polars in memory."
+        tests:
+          - not_null
+          - unique
