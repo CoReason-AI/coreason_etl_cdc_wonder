@@ -112,6 +112,39 @@ class CDCWonderRequestConfig(BaseModel):
     )
 
 
+class PostgresConfig(BaseModel):
+    """
+    AGENT INSTRUCTION: PostgreSQL connection credentials.
+    Variables map to standard Postgres environment variables: PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE.
+    """
+
+    host: str = Field(
+        default="localhost",
+        description="The host for the Postgres database.",
+        alias="PGHOST",
+    )
+    port: int = Field(
+        default=5432,
+        description="The port for the Postgres database.",
+        alias="PGPORT",
+    )
+    user: str = Field(
+        default="postgres",
+        description="The username for the Postgres database.",
+        alias="PGUSER",
+    )
+    password: str = Field(
+        default="postgres",
+        description="The password for the Postgres database.",
+        alias="PGPASSWORD",
+    )
+    database: str = Field(
+        default="postgres",
+        description="The database name for the Postgres database.",
+        alias="PGDATABASE",
+    )
+
+
 class CDCPipelineConfig(BaseSettings):
     """
     AGENT INSTRUCTION: Global configuration for the coreason_etl_cdc_wonder pipeline.
@@ -133,6 +166,10 @@ class CDCPipelineConfig(BaseSettings):
         default_factory=CDCWonderRequestConfig,
         description="Configuration for individual dataset requests.",
     )
+    postgres_config: PostgresConfig = Field(
+        default_factory=PostgresConfig,
+        description="Configuration for the PostgreSQL database connection.",
+    )
 
     def create_dlt_pipeline(self) -> Pipeline:
         """
@@ -147,6 +184,5 @@ class CDCPipelineConfig(BaseSettings):
             progress="log",
             export_schema_path="schemas/export",
         )
-        # Apply the explicit nesting constraint for bronze ingestion
         dlt.config["max_table_nesting"] = 0
         return pipeline
