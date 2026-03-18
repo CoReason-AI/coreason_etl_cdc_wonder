@@ -10,6 +10,7 @@
 
 import os
 import uuid
+from pathlib import Path
 
 import dlt
 from hypothesis import given
@@ -212,3 +213,28 @@ def test_postgres_config_hypothesis(host: str, port: int, user: str, password: s
     assert config.user == user
     assert config.password == password
     assert config.database == database
+
+
+def test_generate_dbt_profiles_yml(tmp_path: Path) -> None:
+    """Test the generation of dbt profiles.yml file."""
+    import yaml
+
+    config = CDCPipelineConfig()
+    target_path = tmp_path / "profiles.yml"
+    config.generate_dbt_profiles_yml(target_path=str(target_path))
+
+    assert target_path.exists()
+    with open(target_path, encoding="utf-8") as f:
+        profile_data = yaml.safe_load(f)
+
+    assert "coreason_etl_cdc_wonder" in profile_data
+    assert profile_data["coreason_etl_cdc_wonder"]["target"] == "dev"
+
+    dev_output = profile_data["coreason_etl_cdc_wonder"]["outputs"]["dev"]
+    assert dev_output["type"] == "postgres"
+    assert dev_output["host"] == config.postgres_config.host
+    assert dev_output["port"] == config.postgres_config.port
+    assert dev_output["user"] == config.postgres_config.user
+    assert dev_output["password"] == config.postgres_config.password
+    assert dev_output["dbname"] == config.postgres_config.database
+    assert dev_output["schema"] == "silver"
