@@ -162,6 +162,10 @@ class CDCPipelineConfig(BaseSettings):
         default=HttpUrl("https://wonder.cdc.gov/controller/datarequest/"),
         description="The base URL for the CDC WONDER API endpoint.",
     )
+    dataset_code: str = Field(
+        default="D76",
+        description="The default dataset code to query if not specified.",
+    )
     request_config: CDCWonderRequestConfig = Field(
         default_factory=CDCWonderRequestConfig,
         description="Configuration for individual dataset requests.",

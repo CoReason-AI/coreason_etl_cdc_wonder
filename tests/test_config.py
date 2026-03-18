@@ -100,6 +100,7 @@ def test_cdcpipeline_config_default() -> None:
     """Test the default configuration of CDCPipelineConfig."""
     config = CDCPipelineConfig()
     assert str(config.api_base_url) == "https://wonder.cdc.gov/controller/datarequest/"
+    assert config.dataset_code == "D76"
     assert isinstance(config.request_config, CDCWonderRequestConfig)
     assert config.request_config.dataset_code == "D76"
 
