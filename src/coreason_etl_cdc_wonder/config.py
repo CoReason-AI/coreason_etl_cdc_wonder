@@ -190,3 +190,36 @@ class CDCPipelineConfig(BaseSettings):
         )
         dlt.config["max_table_nesting"] = 0
         return pipeline
+
+    def generate_dbt_profiles_yml(self, target_path: str = "dbt/profiles.yml") -> None:
+        """
+        AGENT INSTRUCTION: Generates a `profiles.yml` file for dbt to securely connect to the
+        PostgreSQL instance defined in PostgresConfig.
+        """
+        from pathlib import Path
+
+        import yaml
+
+        profile_content = {
+            "coreason_etl_cdc_wonder": {
+                "target": "dev",
+                "outputs": {
+                    "dev": {
+                        "type": "postgres",
+                        "host": self.postgres_config.host,
+                        "port": self.postgres_config.port,
+                        "user": self.postgres_config.user,
+                        "password": self.postgres_config.password,
+                        "dbname": self.postgres_config.database,
+                        "schema": "silver",
+                        "threads": 4,
+                        "keepalives_idle": 0,
+                    }
+                },
+            }
+        }
+
+        path = Path(target_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            yaml.dump(profile_content, f, default_flow_style=False)
