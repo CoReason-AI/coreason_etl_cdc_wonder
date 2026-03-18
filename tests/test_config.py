@@ -238,3 +238,20 @@ def test_generate_dbt_profiles_yml(tmp_path: Path) -> None:
     assert dev_output["password"] == config.postgres_config.password
     assert dev_output["dbname"] == config.postgres_config.database
     assert dev_output["schema"] == "silver"
+
+
+def test_dlt_pipeline_credentials() -> None:
+    """Test that the dlt pipeline correctly sets PostgreSQL credentials from config."""
+    config = CDCPipelineConfig()
+    config.create_dlt_pipeline()
+
+    from typing import Any
+
+    creds: dict[str, Any] | None = dlt.config.get("destination.postgres.credentials")
+    assert creds is not None
+    assert creds["drivername"] == "postgresql"
+    assert creds["host"] == config.postgres_config.host
+    assert creds["port"] == config.postgres_config.port
+    assert creds["username"] == config.postgres_config.user
+    assert creds["password"] == config.postgres_config.password
+    assert creds["database"] == config.postgres_config.database

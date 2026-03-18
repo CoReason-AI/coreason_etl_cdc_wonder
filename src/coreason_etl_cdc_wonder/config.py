@@ -189,6 +189,14 @@ class CDCPipelineConfig(BaseSettings):
             export_schema_path="schemas/export",
         )
         dlt.config["max_table_nesting"] = 0
+        dlt.config["destination.postgres.credentials"] = {
+            "drivername": "postgresql",
+            "host": self.postgres_config.host,
+            "port": self.postgres_config.port,
+            "username": self.postgres_config.user,
+            "password": self.postgres_config.password,
+            "database": self.postgres_config.database,
+        }
         return pipeline
 
     def generate_dbt_profiles_yml(self, target_path: str = "dbt/profiles.yml") -> None:
