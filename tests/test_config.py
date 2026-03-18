@@ -54,7 +54,7 @@ def test_app_config_custom_env() -> None:
         del os.environ["LOG_LEVEL"]
 
 
-@given(  # type: ignore[misc]
+@given(
     app_env=st.text(),
     debug=st.booleans(),
     secret_key=st.text(),
@@ -132,7 +132,7 @@ def test_cdcwonder_parameters_config_alias() -> None:
     assert config.measure_1 == "D76.M4"
 
 
-@given(  # type: ignore[misc]
+@given(
     b1=st.text(),
     b2=st.text(),
     b3=st.text(),
@@ -155,7 +155,7 @@ def test_cdcwonder_parameters_config_hypothesis(
     assert config.custom_parameters == custom
 
 
-@given(dataset_code=st.text(), accept_restrictions=st.booleans())  # type: ignore[misc]
+@given(dataset_code=st.text(), accept_restrictions=st.booleans())
 def test_cdcwonder_request_config_hypothesis(dataset_code: str, accept_restrictions: bool) -> None:
     """Property-based tests for CDCWonderRequestConfig."""
     config = CDCWonderRequestConfig(dataset_code=dataset_code, accept_datause_restrictions=accept_restrictions)
@@ -163,7 +163,7 @@ def test_cdcwonder_request_config_hypothesis(dataset_code: str, accept_restricti
     assert config.accept_datause_restrictions is accept_restrictions
 
 
-@given(url=urls())  # type: ignore[misc]
+@given(url=urls())
 def test_cdcpipeline_config_hypothesis(url: str) -> None:
     """Property-based tests for CDCPipelineConfig with various valid URLs."""
     os.environ["CDC_WONDER_API_BASE_URL"] = url
@@ -196,7 +196,7 @@ def test_postgres_config_default() -> None:
     assert config.database == "postgres"
 
 
-@given(  # type: ignore[misc]
+@given(
     host=st.text(),
     port=st.integers(),
     user=st.text(),
