@@ -8,8 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
 
-from collections.abc import Iterable, Iterator
-from typing import Any
+import io
+from collections.abc import Iterator
+from typing import IO, Any
 
 import pytest
 import requests
@@ -18,14 +19,14 @@ from coreason_etl_cdc_wonder.config import CDCPipelineConfig, CDCWonderParameter
 from coreason_etl_cdc_wonder.resource import get_wonder_mortality_resource
 
 
-def _mock_fetch_wonder_data(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> Iterator[bytes]:
+def _mock_fetch_wonder_data(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> IO[bytes]:
     """Mock for fetch_wonder_data."""
     _ = config
     _ = delay_seconds
-    yield b"<r><c v='2020'/><c v='C34'/></r>"
+    return io.BytesIO(b"<r><c v='2020'/><c v='C34'/></r>")
 
 
-def _mock_parse_wonder_xml_stream(stream: Iterable[bytes]) -> Iterator[dict[str, Any]]:
+def _mock_parse_wonder_xml_stream(stream: IO[bytes]) -> Iterator[dict[str, Any]]:
     """Mock for parse_wonder_xml_stream."""
     _ = stream
     yield {"raw_data": {"c": [{"@v": "2020"}, {"@v": "C34"}]}}
@@ -58,7 +59,7 @@ def test_get_wonder_mortality_resource(monkeypatch: pytest.MonkeyPatch) -> None:
     assert row["raw_data"]["c"][1]["@v"] == "C34"
 
 
-def _mock_parse_wonder_xml_stream_multiple(stream: Iterable[bytes]) -> Iterator[dict[str, Any]]:
+def _mock_parse_wonder_xml_stream_multiple(stream: IO[bytes]) -> Iterator[dict[str, Any]]:
     """Mock for parse_wonder_xml_stream returning multiple rows."""
     _ = stream
     yield {"raw_data": {"c": [{"@v": "2020"}, {"@v": "C34"}]}}
@@ -89,7 +90,7 @@ def test_get_wonder_mortality_resource_multiple_rows(monkeypatch: pytest.MonkeyP
     assert rows[1]["raw_data"]["c"][1]["@v"] == "C35"
 
 
-def _mock_parse_wonder_xml_stream_empty(stream: Iterable[bytes]) -> Iterator[dict[str, Any]]:
+def _mock_parse_wonder_xml_stream_empty(stream: IO[bytes]) -> Iterator[dict[str, Any]]:
     """Mock for parse_wonder_xml_stream returning empty stream."""
     _ = stream
     yield from []
@@ -107,7 +108,7 @@ def test_get_wonder_mortality_resource_empty_stream(monkeypatch: pytest.MonkeyPa
     assert len(rows) == 0
 
 
-def _mock_fetch_wonder_data_exception(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> Iterator[bytes]:
+def _mock_fetch_wonder_data_exception(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> IO[bytes]:
     """Mock for fetch_wonder_data throwing an exception."""
     _ = config
     _ = delay_seconds
