@@ -11,6 +11,7 @@
 
 import pytest
 from pydantic import ValidationError
+from pydantic_settings.exceptions import SettingsError
 
 from coreason_etl_cdc_wonder.main import hello_world, setup_config
 
@@ -77,3 +78,49 @@ def test_setup_config_invalid_boolean(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(ValidationError) as exc_info:
         setup_config()
     assert "Input should be a valid boolean" in str(exc_info.value)
+
+
+def test_setup_config_complex_nested_json(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test setup_config parses complex nested JSON configuration correctly."""
+    json_config = """
+    {
+        "dataset_code": "D77",
+        "accept_datause_restrictions": false,
+        "parameters": {
+            "B_1": "Custom.V1",
+            "M_1": "Custom.M1",
+            "custom_parameters": {
+                "Extra": "Value"
+            }
+        }
+    }
+    """
+    monkeypatch.setenv("CDC_WONDER_REQUEST_CONFIG", json_config)
+
+    _app_config, pipeline_config = setup_config()
+
+    # Verify parsing
+    assert pipeline_config.request_config.dataset_code == "D77"
+    assert pipeline_config.request_config.accept_datause_restrictions is False
+    assert pipeline_config.request_config.parameters.group_by_1 == "Custom.V1"
+    assert pipeline_config.request_config.parameters.measure_1 == "Custom.M1"
+    assert pipeline_config.request_config.parameters.custom_parameters == {"Extra": "Value"}
+
+
+def test_setup_config_malformed_json(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test setup_config raises SettingsError on malformed JSON payload."""
+    # JSON missing closing brace
+    monkeypatch.setenv("CDC_WONDER_REQUEST_CONFIG", '{"dataset_code": "D77"')
+
+    with pytest.raises(SettingsError) as exc_info:
+        setup_config()
+
+    assert "error parsing value" in str(exc_info.value)
+
+
+def test_setup_config_empty_string_for_integer(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test setup_config raises ValidationError for empty string mapped to integer."""
+    monkeypatch.setenv("CDC_WONDER_POSTGRES_CONFIG", '{"PGPORT": ""}')
+    with pytest.raises(ValidationError) as exc_info:
+        setup_config()
+    assert "Input should be a valid integer" in str(exc_info.value)
