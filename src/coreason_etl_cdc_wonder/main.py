@@ -8,7 +8,23 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
 
+
+from coreason_etl_cdc_wonder.config import AppConfig, CDCPipelineConfig
 from coreason_etl_cdc_wonder.utils.logger import logger
+
+
+def setup_config() -> tuple[AppConfig, CDCPipelineConfig]:
+    """
+    AGENT INSTRUCTION: Wires up the foundational configuration.
+    Instantiates and validates AppConfig and CDCPipelineConfig.
+    Raises ValidationError if required configuration parameters are malformed.
+    """
+    logger.info("Initializing configuration for coreason_etl_cdc_wonder")
+    app_config = AppConfig()
+    pipeline_config = CDCPipelineConfig()
+
+    logger.info("Configuration validated successfully")
+    return app_config, pipeline_config
 
 
 def hello_world() -> str:

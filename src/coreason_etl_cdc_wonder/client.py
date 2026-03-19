@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
 
 import time
-from collections.abc import Iterator
+from typing import IO
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -38,7 +38,7 @@ def _create_retry_session() -> requests.Session:
     return session
 
 
-def fetch_wonder_data(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> Iterator[bytes]:
+def fetch_wonder_data(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> IO[bytes]:
     """
     AGENT INSTRUCTION: Fetches data from the CDC WONDER API via POST.
     It streams the response to enable memory-conscious parsing.
@@ -48,7 +48,7 @@ def fetch_wonder_data(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> 
         delay_seconds: Polite delay before initiating the request.
 
     Returns:
-        An iterator yielding chunks of bytes from the HTTP response.
+        A file-like object yielding chunks of bytes from the HTTP response.
     """
     logger.info("Preparing to query CDC WONDER API", dataset=config.request_config.dataset_code)
 
@@ -71,6 +71,7 @@ def fetch_wonder_data(config: CDCPipelineConfig, delay_seconds: float = 2.0) -> 
     )
 
     response.raise_for_status()
+    response.raw.decode_content = True
 
     logger.info("Successfully received streaming response from CDC WONDER API")
-    return response.iter_content(chunk_size=8192)
+    return response.raw  # type: ignore[return-value]

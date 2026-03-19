@@ -8,43 +8,15 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
 
-from collections.abc import Iterable, Iterator
-from typing import Any
+from collections.abc import Iterator
+from typing import IO, Any
 
 from lxml import etree
 
 from coreason_etl_cdc_wonder.utils.logger import logger
 
 
-class ChunkStream:
-    """
-    AGENT INSTRUCTION: Helper class to wrap an iterable of bytes into a file-like object
-    with a `read()` method, as expected by `lxml.etree.iterparse`.
-    """
-
-    def __init__(self, iterator: Iterable[bytes]) -> None:
-        self.iterator = iter(iterator)
-        self.buffer = b""
-
-    def read(self, size: int = -1) -> bytes:
-        if size < 0:
-            result = self.buffer + b"".join(self.iterator)
-            self.buffer = b""
-            return result
-
-        while len(self.buffer) < size:
-            try:
-                chunk = next(self.iterator)
-                self.buffer += chunk
-            except StopIteration:
-                break
-
-        result = self.buffer[:size]
-        self.buffer = self.buffer[size:]
-        return result
-
-
-def parse_wonder_xml_stream(stream: Iterable[bytes]) -> Iterator[dict[str, Any]]:
+def parse_wonder_xml_stream(stream: IO[bytes]) -> Iterator[dict[str, Any]]:
     """
     AGENT INSTRUCTION: Parses an XML stream from the CDC WONDER API using lxml.etree.iterparse.
     Extracts `<r>` elements from `<data-table>` and yields them wrapped in `{"raw_data": ...}`.
@@ -52,9 +24,7 @@ def parse_wonder_xml_stream(stream: Iterable[bytes]) -> Iterator[dict[str, Any]]
     """
     logger.info("Starting memory-conscious XML stream parsing")
 
-    file_like_stream = ChunkStream(stream)
-
-    context = etree.iterparse(file_like_stream, events=("end",), tag="r", recover=True)
+    context = etree.iterparse(stream, events=("end",), tag="r", recover=True)
 
     for _event, elem in context:
         row_dict = _element_to_dict(elem)
