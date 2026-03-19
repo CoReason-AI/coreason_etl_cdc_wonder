@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_etl_cdc_wonder
 
+import io
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -40,16 +41,16 @@ def test_fetch_wonder_data_success(mock_create_session: MagicMock, mock_sleep: M
 
     mock_session = MagicMock()
     mock_response = MagicMock()
-    mock_response.iter_content.return_value = [b"<data>", b"</data>"]
+    mock_response.raw = io.BytesIO(b"<data></data>")
     mock_session.post.return_value = mock_response
     mock_create_session.return_value = mock_session
 
-    result = list(fetch_wonder_data(config, delay_seconds=1.5))
+    result = fetch_wonder_data(config, delay_seconds=1.5)
 
     mock_sleep.assert_called_once_with(1.5)
     mock_session.post.assert_called_once()
     mock_response.raise_for_status.assert_called_once()
-    assert result == [b"<data>", b"</data>"]
+    assert result.read() == b"<data></data>"
 
     # Verify endpoint construction
     _call_args, call_kwargs = mock_session.post.call_args

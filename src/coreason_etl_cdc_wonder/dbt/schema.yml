@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: cdc_wonder_mortality_rates
+  - name: coreason_etl_cdc_wonder_silver_cdc_wonder_mortality_rates
     description: "Silver layer table containing parsed and flattened mortality rates from CDC WONDER."
     columns:
       - name: coreason_id
