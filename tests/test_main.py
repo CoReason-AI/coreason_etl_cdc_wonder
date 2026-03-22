@@ -127,7 +127,7 @@ def test_setup_config_empty_string_for_integer(monkeypatch: pytest.MonkeyPatch) 
 
 
 def test_run_pipeline(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test the complete pipeline orchestration wrapper."""
+    """Test the complete pipeline orchestration wrapper catches expected warnings."""
     from unittest.mock import MagicMock
 
     import coreason_etl_cdc_wonder.resource
@@ -136,20 +136,40 @@ def test_run_pipeline(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_pipeline = MagicMock()
     mock_pipeline.run = MagicMock()
 
-    # Mock the setup to prevent real dlt init
     monkeypatch.setattr(
         "coreason_etl_cdc_wonder.main.setup_config",
         MagicMock(return_value=(MagicMock(), MagicMock(create_dlt_pipeline=MagicMock(return_value=mock_pipeline)))),
     )
-
-    # Mock the resource using its actual module, not main
     monkeypatch.setattr(coreason_etl_cdc_wonder.resource, "get_wonder_mortality_resource", MagicMock())
 
-    # Mock Polars to return an empty DF so we can test the exception path quickly
-    monkeypatch.setattr("polars.read_database_uri", MagicMock(side_effect=Exception("Database down")))
+    # Mocking read_database_uri to throw an Exception containing "Simulated" to hit the test exception branch cleanly
+    monkeypatch.setattr("polars.read_database_uri", MagicMock(side_effect=Exception("Simulated error")))
 
     run_pipeline()
     mock_pipeline.run.assert_called_once()
+
+
+def test_run_pipeline_fatal_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test the complete pipeline orchestration wrapper catches and raises unknown errors."""
+    from unittest.mock import MagicMock
+
+    import coreason_etl_cdc_wonder.resource
+    from coreason_etl_cdc_wonder.main import run_pipeline
+
+    mock_pipeline = MagicMock()
+    mock_pipeline.run = MagicMock()
+
+    monkeypatch.setattr(
+        "coreason_etl_cdc_wonder.main.setup_config",
+        MagicMock(return_value=(MagicMock(), MagicMock(create_dlt_pipeline=MagicMock(return_value=mock_pipeline)))),
+    )
+    monkeypatch.setattr(coreason_etl_cdc_wonder.resource, "get_wonder_mortality_resource", MagicMock())
+
+    # We raise an Exception here that DOES NOT match the soft error strings
+    monkeypatch.setattr("polars.read_database_uri", MagicMock(side_effect=Exception("Unknown fatal error")))
+
+    with pytest.raises(Exception, match="Unknown fatal error"):
+        run_pipeline()
 
 
 def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -172,17 +192,16 @@ def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_pipeline_config.postgres_config.database = "db"
 
     monkeypatch.setattr(
-        "coreason_etl_cdc_wonder.main.setup_config", MagicMock(return_value=(MagicMock(), mock_pipeline_config))
+        "coreason_etl_cdc_wonder.main.setup_config",
+        MagicMock(return_value=(MagicMock(), mock_pipeline_config)),
     )
 
     monkeypatch.setattr(coreason_etl_cdc_wonder.resource, "get_wonder_mortality_resource", MagicMock())
 
-    # Mock successful DB read and return some fake raw data
     raw_data = [{"c": [{"@v": "1999"}, {"@v": "C34.9"}, {"@v": "100"}, {"@v": "100000"}, {"@v": "100.0"}]}]
     mock_df = pl.DataFrame({"raw_data": raw_data})
     monkeypatch.setattr("polars.read_database_uri", MagicMock(return_value=mock_df))
 
-    # Mock write
     mock_write = MagicMock()
     monkeypatch.setattr("polars.DataFrame.write_database", mock_write)
 
