@@ -124,3 +124,69 @@ def test_setup_config_empty_string_for_integer(monkeypatch: pytest.MonkeyPatch) 
     with pytest.raises(ValidationError) as exc_info:
         setup_config()
     assert "Input should be a valid integer" in str(exc_info.value)
+
+
+def test_run_pipeline(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test the complete pipeline orchestration wrapper."""
+    from unittest.mock import MagicMock
+
+    import coreason_etl_cdc_wonder.resource
+    from coreason_etl_cdc_wonder.main import run_pipeline
+
+    mock_pipeline = MagicMock()
+    mock_pipeline.run = MagicMock()
+
+    # Mock the setup to prevent real dlt init
+    monkeypatch.setattr(
+        "coreason_etl_cdc_wonder.main.setup_config",
+        MagicMock(return_value=(MagicMock(), MagicMock(create_dlt_pipeline=MagicMock(return_value=mock_pipeline)))),
+    )
+
+    # Mock the resource using its actual module, not main
+    monkeypatch.setattr(coreason_etl_cdc_wonder.resource, "get_wonder_mortality_resource", MagicMock())
+
+    # Mock Polars to return an empty DF so we can test the exception path quickly
+    monkeypatch.setattr("polars.read_database_uri", MagicMock(side_effect=Exception("Database down")))
+
+    run_pipeline()
+    mock_pipeline.run.assert_called_once()
+
+
+def test_run_pipeline_success(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test the complete pipeline orchestration wrapper success path."""
+    from unittest.mock import MagicMock
+
+    import polars as pl
+
+    import coreason_etl_cdc_wonder.resource
+    from coreason_etl_cdc_wonder.main import run_pipeline
+
+    mock_pipeline = MagicMock()
+    mock_pipeline.run = MagicMock()
+    mock_pipeline_config = MagicMock()
+    mock_pipeline_config.create_dlt_pipeline.return_value = mock_pipeline
+    mock_pipeline_config.postgres_config.user = "user"
+    mock_pipeline_config.postgres_config.password = "pass"  # noqa: S105
+    mock_pipeline_config.postgres_config.host = "host"
+    mock_pipeline_config.postgres_config.port = 5432
+    mock_pipeline_config.postgres_config.database = "db"
+
+    monkeypatch.setattr(
+        "coreason_etl_cdc_wonder.main.setup_config", MagicMock(return_value=(MagicMock(), mock_pipeline_config))
+    )
+
+    monkeypatch.setattr(coreason_etl_cdc_wonder.resource, "get_wonder_mortality_resource", MagicMock())
+
+    # Mock successful DB read and return some fake raw data
+    raw_data = [{"c": [{"@v": "1999"}, {"@v": "C34.9"}, {"@v": "100"}, {"@v": "100000"}, {"@v": "100.0"}]}]
+    mock_df = pl.DataFrame({"raw_data": raw_data})
+    monkeypatch.setattr("polars.read_database_uri", MagicMock(return_value=mock_df))
+
+    # Mock write
+    mock_write = MagicMock()
+    monkeypatch.setattr("polars.DataFrame.write_database", mock_write)
+
+    run_pipeline()
+
+    mock_pipeline.run.assert_called_once()
+    mock_write.assert_called_once()
