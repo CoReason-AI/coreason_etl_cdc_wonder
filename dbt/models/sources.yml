@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: bronze
+    schema: bronze
+    tables:
+      - name: coreason_etl_cdc_wonder_bronze_cdc_wonder_mortality_raw
+        columns:
+          - name: raw_data
+          - name: ingestion_ts
+
+  - name: silver
+    schema: silver
+    tables:
+      - name: coreason_etl_cdc_wonder_silver_cdc_wonder_mortality
+        columns:
+          - name: coreason_id
+          - name: year
+          - name: icd_10_code
+          - name: deaths
+          - name: population
+          - name: crude_rate
