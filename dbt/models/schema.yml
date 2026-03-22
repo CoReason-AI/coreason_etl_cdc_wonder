@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: cdc_wonder_mortality_silver
+  - name: coreason_etl_cdc_wonder_silver_cdc_wonder_mortality
     description: "Silver layer table mapping CDC mortality metrics back to logical columns."
     columns:
       - name: icd_10_code
@@ -17,3 +17,33 @@ models:
         tests:
           - not_null
           - unique
+
+  - name: coreason_etl_cdc_wonder_gold_disease_burden_index
+    description: "Gold layer table serving historical mortality counts grouped by ICD-10 codes."
+    columns:
+      - name: coreason_id
+        description: "Deterministic ID mapping."
+        tests:
+          - not_null
+          - unique
+      - name: icd_10_code
+        description: "The ICD-10 code."
+        tests:
+          - not_null
+      - name: is_suppressed_or_unreliable
+        description: "Boolean analytic flag if the crude rate or deaths count was suppressed by CDC."
+        tests:
+          - not_null
+
+  - name: coreason_etl_cdc_wonder_gold_icd10_to_seer_bridge
+    description: "A mapping view aligning CDC ICD-10 oncology codes to SEER format."
+    columns:
+      - name: cdc_icd_10_code
+        description: "Original ICD-10 code from WONDER."
+        tests:
+          - not_null
+          - unique
+      - name: mapped_seer_block_id
+        description: "The 3-character block ICD-10 code mapped to SEER."
+        tests:
+          - not_null
