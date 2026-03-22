@@ -20,7 +20,7 @@ from coreason_etl_cdc_wonder.parser import parse_wonder_xml_stream
 from coreason_etl_cdc_wonder.utils.logger import logger
 
 
-@dlt.resource(name="coreason_etl_cdc_wonder_bronze_cdc_wonder_mortality_raw", write_disposition="append")
+@dlt.resource(name="coreason_etl_cdc_wonder_bronze_cdc_wonder_mortality_raw", write_disposition="append")  # type: ignore[misc]  # type: ignore[misc]
 def get_wonder_mortality_resource(config: CDCPipelineConfig) -> Iterator[dict[str, Any]]:
     """
     AGENT INSTRUCTION: A dlt resource that streams mortality data from the CDC WONDER API.
