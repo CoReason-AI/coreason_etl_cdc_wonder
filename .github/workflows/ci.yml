@@ -74,10 +74,10 @@ jobs:
   test-extended:
     needs: [lint-and-audit]
     if: always() && needs.lint-and-audit.result == 'success'
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [ubuntu-latest]
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493

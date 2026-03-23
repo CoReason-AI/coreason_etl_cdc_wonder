@@ -12,6 +12,8 @@ authors = [
     { name = "Akshaya M", email = "akshaya.movvar@coreason.ai" },
 ]
 dependencies = [
+    "adbc-driver-postgresql>=1.10.0",
+    "connectorx>=0.4.5",
     "dbt-core>=1.11.7",
     "dbt-postgres>=1.10.0",
     "dlt>=1.23.0",
@@ -19,6 +21,7 @@ dependencies = [
     "lxml>=6.0.2",
     "polars>=1.39.0",
     "psutil>=7.2.2",
+    "pyarrow>=23.0.1",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.13.1",
     "pyyaml>=6.0.3",
