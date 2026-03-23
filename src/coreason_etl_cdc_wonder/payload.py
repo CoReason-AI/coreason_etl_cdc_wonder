@@ -44,4 +44,5 @@ def generate_wonder_xml_payload(config: CDCWonderRequestConfig) -> str:
             value = ET.SubElement(param, "value")
             value.text = str(v)
 
-    return ET.tostring(root, encoding="unicode", method="xml")
+    xml_bytes = ET.tostring(root, encoding="utf-8", method="xml", xml_declaration=True)
+    return str(xml_bytes.decode("utf-8"))
