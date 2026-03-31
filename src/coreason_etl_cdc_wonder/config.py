@@ -189,7 +189,7 @@ class CDCPipelineConfig(BaseSettings):
             export_schema_path="schemas/export",
         )
         dlt.config["max_table_nesting"] = 0
-        dlt.config["destination.postgres.credentials"] = {
+        dlt.secrets["destination.postgres.credentials"] = {
             "drivername": "postgresql",
             "host": self.postgres_config.host,
             "port": self.postgres_config.port,
