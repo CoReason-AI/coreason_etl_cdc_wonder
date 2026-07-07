@@ -12,7 +12,21 @@ authors = [
     { name = "Akshaya M", email = "akshaya.movvar@coreason.ai" },
 ]
 dependencies = [
+    "adbc-driver-postgresql>=1.10.0",
+    "connectorx>=0.4.5",
+    "dbt-core>=1.11.7",
+    "dbt-postgres>=1.10.0",
+    "dlt>=1.23.0",
     "loguru>=0.7.2",
+    "lxml>=6.0.2",
+    "polars>=1.39.0",
+    "psutil>=7.2.2",
+    "pyarrow>=23.0.1",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
+    "pyyaml>=6.0.3",
+    "requests>=2.32.5",
+    "urllib3>=2.6.3",
 ]
 license = { file = "LICENSE" }
 classifiers = [
@@ -37,7 +51,9 @@ dev = [
     "mkdocstrings-python",
     "types-pyyaml>=6.0.12.20250915",
     "tzdata>=2025.3",
-    "pytest-xdist>=3.6.1"
+    "pytest-xdist>=3.6.1",
+    "types-requests>=2.32.4.20260107",
+    "lxml-stubs>=0.5.1",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -73,3 +89,19 @@ asyncio_mode = "auto"
 
 [tool.coverage.run]
 omit = ["tests/*"]
+
+[tool.deptry]
+ignore = ["DEP002"]
+
+[[tool.mypy.overrides]]
+module = "pydantic_settings.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "hypothesis.*"
+ignore_missing_imports = true
+
+[tool.uv]
+override-dependencies = [
+    "mashumaro[msgpack]>=3.17"
+]
