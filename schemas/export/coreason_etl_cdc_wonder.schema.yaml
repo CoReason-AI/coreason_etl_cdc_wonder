@@ -1,0 +1,286 @@
+version: 2
+version_hash: F+PBCxufJpxgclca5+Cxsxk5UnqUOZIHSKugm428nQo=
+engine_version: 11
+name: coreason_etl_cdc_wonder
+tables:
+  _dlt_version:
+    columns:
+      version:
+        data_type: bigint
+        nullable: false
+      engine_version:
+        data_type: bigint
+        nullable: false
+      inserted_at:
+        data_type: timestamp
+        nullable: false
+      schema_name:
+        data_type: text
+        nullable: false
+      version_hash:
+        data_type: text
+        nullable: false
+      schema:
+        data_type: text
+        nullable: false
+    write_disposition: skip
+    resource: _dlt_version
+    description: Created by DLT. Tracks schema updates
+  _dlt_loads:
+    columns:
+      load_id:
+        data_type: text
+        nullable: false
+        precision: 64
+      schema_name:
+        data_type: text
+        nullable: true
+      status:
+        data_type: bigint
+        nullable: false
+      inserted_at:
+        data_type: timestamp
+        nullable: false
+      schema_version_hash:
+        data_type: text
+        nullable: true
+    write_disposition: skip
+    resource: _dlt_loads
+    description: Created by DLT. Tracks completed loads
+  coreason_etl_cdc_wonder_bronze_cdc_wonder_mortality_raw:
+    columns:
+      ingestion_ts:
+        data_type: timestamp
+        nullable: true
+      query_parameters__b_1:
+        data_type: text
+        nullable: true
+      query_parameters__b_2:
+        data_type: text
+        nullable: true
+      query_parameters__b_3:
+        data_type: text
+        nullable: true
+      query_parameters__m_1:
+        data_type: text
+        nullable: true
+      query_parameters__m_2:
+        data_type: text
+        nullable: true
+      query_parameters__m_3:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__b_4:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__b_5:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_v1_fmode:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_v2_fmode:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_aar:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_aar_pop:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_age:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_javascript:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_location:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_precision:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_rate_per:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_show_suppressed:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_show_totals:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_show_zeros:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_timeout:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_title:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__o_ucd:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__action_send:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__stage:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v1:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v2:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v9:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v10:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v11:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v12:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v17:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v19:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v20:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v21:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v22:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v23:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v24:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v25:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v27:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v4:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v5:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v51:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v52:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v6:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v7:
+        data_type: text
+        nullable: true
+      query_parameters__custom_parameters__v_d76_v8:
+        data_type: text
+        nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    write_disposition: append
+    resource: coreason_etl_cdc_wonder_bronze_cdc_wonder_mortality_raw
+    x-normalizer:
+      seen-data: true
+  _dlt_pipeline_state:
+    columns:
+      version:
+        data_type: bigint
+        nullable: false
+      engine_version:
+        data_type: bigint
+        nullable: false
+      pipeline_name:
+        data_type: text
+        nullable: false
+      state:
+        data_type: text
+        nullable: false
+      created_at:
+        data_type: timestamp
+        nullable: false
+      version_hash:
+        data_type: text
+        nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+        precision: 64
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    write_disposition: append
+    file_format: preferred
+    resource: _dlt_pipeline_state
+    x-normalizer:
+      seen-data: true
+  coreason_etl_cdc_wonder_bronz7yaa2ar_mortality_raw__raw_data__c:
+    columns:
+      av:
+        data_type: text
+        nullable: true
+      _dlt_parent_id:
+        data_type: text
+        nullable: false
+        parent_key: true
+      _dlt_list_idx:
+        data_type: bigint
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    parent: coreason_etl_cdc_wonder_bronze_cdc_wonder_mortality_raw
+    x-normalizer:
+      seen-data: true
+settings:
+  detections:
+  - iso_timestamp
+  default_hints:
+    not_null:
+    - _dlt_id
+    - _dlt_root_id
+    - _dlt_parent_id
+    - _dlt_list_idx
+    - _dlt_load_id
+    parent_key:
+    - _dlt_parent_id
+    root_key:
+    - _dlt_root_id
+    unique:
+    - _dlt_id
+    row_key:
+    - _dlt_id
+normalizers:
+  names: snake_case
+  json:
+    module: dlt.common.normalizers.json.relational
+previous_hashes:
+- t+4u5PFJRLEq3E+wvorOcgbh0FlrFh/xXfGkWyz0vNw=
+- kfuEcw6NiS61BznN10Oj59VbX6oZYr4IqoZdiG9wK6Y=

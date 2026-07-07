@@ -100,3 +100,8 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "hypothesis.*"
 ignore_missing_imports = true
+
+[tool.uv]
+override-dependencies = [
+    "mashumaro[msgpack]>=3.17"
+]
